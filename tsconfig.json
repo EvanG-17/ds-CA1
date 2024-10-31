@@ -30,6 +30,8 @@
     "cdk.out"
   ],
   "include": [
-    "shared/*.json"
+    "bin/**/*.ts",
+    "lambda/**/*.ts",
+    "lib/**/*.ts"
   ]
 }
