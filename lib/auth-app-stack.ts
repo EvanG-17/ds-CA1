@@ -10,6 +10,7 @@ import { AppApi } from './app-api';
 import * as apig from "aws-cdk-lib/aws-apigateway";
 import { generateBatch } from "../shared/util";
 import { movies } from "../seed/movies";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class AuthAppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -46,6 +47,15 @@ export class AuthAppStack extends cdk.Stack {
       partitionKey: { name: "id", type: dynamodb.AttributeType.NUMBER },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       tableName: "Movies",
+    });
+
+
+    const translationsTable = new dynamodb.Table(this, "TranslationsTable", {
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      partitionKey: { name: "OriginalText", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "TargetLanguage", type: dynamodb.AttributeType.STRING },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      tableName: "Translations",
     });
 
     // Lambda Functions
@@ -97,6 +107,30 @@ export class AuthAppStack extends cdk.Stack {
       },
     });
 
+
+    const getTranslationFn = new lambdanode.NodejsFunction(
+      this,
+      "GetTranslationFn",
+      {
+        architecture: lambda.Architecture.ARM_64,
+        runtime: lambda.Runtime.NODEJS_16_X,
+        entry: `${__dirname}/../lambda/rest/translate.ts`,
+        timeout: cdk.Duration.seconds(10),
+        memorySize: 128,
+        environment: {
+          TABLE_NAME: moviesTable.tableName,
+          REGION: 'eu-west-1',
+        },
+      }
+    );
+    const translatePolicyStatement = new iam.PolicyStatement({
+      actions: ["translate:TranslateText"],
+      resources: ["*"],
+    });
+    getTranslationFn.addToRolePolicy(translatePolicyStatement);
+
+
+
     // Initialize Data in DynamoDB
     new custom.AwsCustomResource(this, "moviesddbInitData", {
       onCreate: {
@@ -119,6 +153,10 @@ export class AuthAppStack extends cdk.Stack {
     moviesTable.grantReadData(getAllMoviesFn);
     moviesTable.grantReadWriteData(newMovieFn);
     moviesTable.grantReadWriteData(deleteMovieFn);
+    translationsTable.grantReadWriteData(getTranslationFn);
+    moviesTable.grantReadWriteData(getTranslationFn);
+    moviesTable.grantReadData(getTranslationFn);
+
 
     // API Gateway
     const api = new apig.RestApi(this, "RestAPI", {
@@ -141,5 +179,11 @@ export class AuthAppStack extends cdk.Stack {
     const movieEndpoint = moviesEndpoint.addResource("{movieId}");
     movieEndpoint.addMethod("GET", new apig.LambdaIntegration(getMovieByIdFn, { proxy: true }));
     movieEndpoint.addMethod("DELETE", new apig.LambdaIntegration(deleteMovieFn, { proxy: true }));
+
+    const translateEndpoint = movieEndpoint.addResource("translate");
+    translateEndpoint.addMethod(
+      "GET",
+      new apig.LambdaIntegration(getTranslationFn, { proxy: true })
+    )
   }
 }
