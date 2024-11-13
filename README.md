@@ -8,23 +8,31 @@ __Demo:__ N/A
 
 State the context you chose for your web API and detail the attributes stored in the main database table.
 
+The context I chose for this assignment/API is movie details data. The database stores each attribute about the movie as shown below:
+
++ Title: The title of a movie.
++ Overview: A summary of what the movie is about, including the plot and actors.
++ ID: This is a unique ID attached to each movie, for storage and retrieval purposes
++ Original Language: This stored attributes such as "tl" or "en". Also used for the translate feature
++ Genre ID's: This was used to group like movies with like.
+
 ### App API endpoints.
 
 [ Provide a bullet-point list of the app's endpoints (excluding the Auth API) you have successfully implemented. ]
 e.g.
  
-+ POST /thing - add a new 'thing'.
-+ GET /thing/{partition-key}/ - Get all the 'things' with a specified partition key.
-+ GEtT/thing/{partition-key}?attributeX=value - Get all the 'things' with a specified partition key value and attributeX satisfying the condition .....
++ GET /movies
++ GET /movies/(movieId)
++ POST /movies
++ DELETE /movies/(movieId)
++ PUT /movies/(movieId)
++ GET /dev/movies/(movieId)/translate?language=es
+
 
 ### Update constraint (if relevant).
 
-[Briefly explain your design for the solution to the PUT/Update constraint 
-- only the user who added an item to the main table could update it.]
+For this assignment only authenticated members are able to update a movie. Once authenticated, any member can update any movie, there is no restriction to what movie an individual can update, only that they have to be authenticated with the "site".
 
-### Translation persistence (if relevant).
-
-[Briefly explain your design for the solution to avoid repeat requests to Amazon Translate - persist translations so that Amazon Translate can be bypassed for repeat translation requests.]
 
 ###  Extra (If relevant).
 
