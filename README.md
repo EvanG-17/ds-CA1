@@ -6,8 +6,6 @@ __Demo:__ N/A
 
 ### Context.
 
-State the context you chose for your web API and detail the attributes stored in the main database table.
-
 The context I chose for this assignment/API is movie details data. The database stores each attribute about the movie as shown below:
 
 + Title: The title of a movie.
