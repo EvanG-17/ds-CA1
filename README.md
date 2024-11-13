@@ -32,6 +32,16 @@ e.g.
 For this assignment only authenticated members are able to update a movie. Once authenticated, any member can update any movie, there is no restriction to what movie an individual can update, only that they have to be authenticated with the "site".
 
 
-###  Extra (If relevant).
+###  Extra/Images
 
-[ State whether you have created a multi-stack solution for this assignment or used lambda layers to speed up update deployments. Also, mention any aspect of the CDK framework __that was not covered in the lectures that you used in this assignment. ]
+![stacks showing creation time](img/stacksCreated.png)
+
+Here we can see the above stack created and its creation time
+
+![Dynamo DB showing users](img/dynamoDB.png)
+
+Here we can see both databases
+
+![Aws Cognito](img/awsCognito.png)
+
+Here we can see users who have successfully authenticated, hiding their email's for privacy
